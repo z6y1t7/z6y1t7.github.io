@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>黄时雨 | 个人名片</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        :root {
+            --bg: #F2F0EB;
+            --page-bg: #FFFFFF;
+            --dark-block: #1A1A1A;
+            --text-primary: #1A1A1A;
+            --text-secondary: #555555;
+            --text-muted: #999999;
+            --text-on-dark: #F0EDE6;
+            --border: #E0DDD8;
+            --shadow: rgba(0, 0, 0, 0.08);
+            --ink: #1A1A1A;
+            --ink-light: #C8C4BC;
+            --paper-shadow: rgba(0,0,0,0.12);
+        }
+
+        body.dark {
+            --bg: #141414;
+            --page-bg: #1E1E1E;
+            --dark-block: #F0EDE6;
+            --text-primary: #EBEBEB;
+            --text-secondary: #AAAAAA;
+            --text-muted: #666666;
+            --text-on-dark: #1A1A1A;
+            --border: #333333;
+            --shadow: rgba(0, 0, 0, 0.5);
+            --ink: #E0E0E0;
+            --ink-light: #404040;
+            --paper-shadow: rgba(0,0,0,0.3);
+        }
+
+        body {
+            font-family: "Noto Serif SC", "Songti SC", "SimSun", Georgia, serif;
+            background-color: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            transition: background-color 0.6s ease, color 0.6s ease;
+            overflow-x: hidden;
+            position: relative;
+            width: 100%;
+        }
+
+        .bg-decorations {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-scatter {
+            position: absolute;
+            opacity: 0.15;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 24px; right: 24px;
+            padding: 10px 18px;
+            background: var(--page-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--ink);
+            font-size: 11px;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: -apple-system, sans-serif;
+            z-index: 100;
+        }
+
+        .theme-toggle:hover {
+            background: var(--ink);
+            color: var(--bg);
+        }
+
+        .card-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 480px;
+            height: 680px;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        @media (max-height: 760px) {
+            .card-container { height: 580px; }
+        }
+
+        .card-stack {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--page-bg);
+            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 4px 30px var(--shadow);
+        }
+
+        .page:not(.active) {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px) scale(0.97);
+        }
+
+        .page.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .tear-divider {
+            position: absolute;
+            left: 0; right: 0;
+            height: 20px;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .tear-divider svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .dark-block {
+            background: var(--dark-block);
+            color: var(--text-on-dark);
+            position: relative;
+        }
+
+        .dark-block .tear-divider svg path {
+            fill: var(--dark-block);
+        }
+
+        .light-block .tear-divider svg path {
+            fill: var(--page-bg);
+        }
+
+        .corner-accent {
+            position: absolute;
+            font-size: 10px;
+            letter-spacing: 3px;
+            font-family: -apple-system, sans-serif;
+            color: var(--text-muted);
+            z-index: 10;
+        }
+
+        .corner-accent.tl { top: 20px; left: 24px; }
+        .corner-accent.br { bottom: 20px; right: 24px; }
+
+        .page-inner {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px 44px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .camellia-watermark {
+            position: absolute;
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .camellia-watermark.tr { top: -10px; right: -20px; width: 160px; height: 160px; }
+        .camellia-watermark.bl { bottom: -10px; left: -20px; width: 140px; height: 140px; transform: scaleX(-1); }
+        .camellia-watermark.tl { top: 30px; left: -10px; width: 100px; height: 100px; transform: rotate(-30deg); }
+        .camellia-watermark.br { bottom: 20px; right: -10px; width: 110px; height: 110px; transform: rotate(45deg) scaleX(-1); }
+        .camellia-watermark.small { width: 60px; height: 60px; opacity: 0.06; }
+        .dark-block .camellia-watermark { opacity: 0.08; }
+
+        .petal-scatter {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.12;
+        }
+
+        .dark-block .petal-scatter { opacity: 0.15; }
+
+        .camellia-divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .camellia-divider .div-line {
+            flex: 1;
+            max-width: 60px;
+            height: 1px;
+            background: var(--ink-light);
+        }
+
+        .dark-block .camellia-divider .div-line { background: rgba(240,237,230,0.3); }
+
+        .camellia-divider svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .camellia-corner-deco {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0.15;
+        }
+
+        .dark-block .camellia-corner-deco { opacity: 0.2; }
+
+        .camellia-corner-deco.tr { top: 8px; right: 8px; }
+        .camellia-corner-deco.bl { bottom: 8px; left: 8px; transform: rotate(180deg); }
+
+        .floating-petals {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .label {
+            font-size: 10px;
+            letter-spacing: 8px;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            font-family: -apple-system, sans-serif;
+        }
+
+        .dark-block .label { color: rgba(240,237,230,0.5); }
+
+        .main-title {
+            font-size: 46px;
+            font-weight: 400;
+            letter-spacing: 14px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            max-width: 100%;
+            overflow-wrap: break-word;
+        }
+
+        .ornament {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 24px 0;
+        }
+
+        .orn-line {
+            width: 50px;
+            height: 1px;
+            background: var(--ink-light);
+        }
+
+        .dark-block .orn-line { background: rgba(240,237,230,0.3); }
+
+        .orn-diamond {
+            width: 6px; height: 6px;
+            border: 1px solid var(--ink);
+            transform: rotate(45deg);
+        }
+
+        .dark-block .orn-diamond { border-color: rgba(240,237,230,0.6); }
+
+        .subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+            letter-spacing: 3px;
+            font-style: italic;
+        }
+
+        .dark-block .subtitle { color: rgba(240,237,230,0.6); }
+
+        .avatar-flower {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 28px;
+        }
+
+        .avatar-flower svg { width: 100%; height: 100%; }
+
+        .name-big {
+            font-size: 38px;
+            font-weight: 400;
+            letter-spacing: 14px;
+            margin-bottom: 14px;
+            max-width: 100%;
+            overflow-wrap: break-word;
+        }
+
+        .name-sub {
+            font-size: 10px;
+            letter-spacing: 5px;
+            color: var(--text-muted);
+            font-family: -apple-system, sans-serif;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .dark-block .name-sub { color: rgba(240,237,230,0.5); }
+
+        .info-tags {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px 14px;
+            margin-bottom: 8px;
+        }
+
+        .info-tag {
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dark-block .info-tag { color: rgba(240,237,230,0.75); }
+
+        .info-dot {
+            width: 3px; height: 3px;
+            background: currentColor;
+            border-radius: 50%;
+            opacity: 0.5;
+        }
+
+        .bio {
+            font-size: 14px;
+            line-height: 2.2;
+            letter-spacing: 2px;
+            margin-top: 20px;
+            color: var(--text-secondary);
+        }
+
+        .dark-block .bio { color: rgba(240,237,230,0.7); }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 40px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .sec-line {
+            flex: 1;
+            max-width: 70px;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .dark-block .sec-line { background: rgba(240,237,230,0.2); }
+
+        .sec-label {
+            font-size: 10px;
+            letter-spacing: 6px;
+            color: var(--text-muted);
+            font-family: -apple-system, sans-serif;
+        }
+
+        .dark-block .sec-label { color: rgba(240,237,230,0.5); }
+
+        .interest-list {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 240px;
+        }
+
+        .interest-row {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+            transition: padding-left 0.3s ease, border-color 0.3s ease;
+            cursor: default;
+        }
+
+        .dark-block .interest-row { border-bottom-color: rgba(240,237,230,0.15); }
+
+        .interest-row:first-child { border-top: 1px solid var(--border); }
+        .dark-block .interest-row:first-child { border-top-color: rgba(240,237,230,0.15); }
+
+        .interest-row:hover {
+            padding-left: 14px;
+        }
+
+        .dark-block .interest-row:hover { border-color: rgba(240,237,230,0.5); }
+        .light-block .interest-row:hover { border-color: var(--ink); }
+
+        .int-num {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: -apple-system, sans-serif;
+            min-width: 24px;
+            letter-spacing: 1px;
+        }
+
+        .dark-block .int-num { color: rgba(240,237,230,0.4); }
+
+        .int-name {
+            font-size: 20px;
+            letter-spacing: 6px;
+        }
+
+        .int-icon {
+            margin-left: auto;
+            font-size: 16px;
+            opacity: 0.5;
+        }
+
+        .nav-btn {
+            position: absolute;
+            bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--text-muted);
+            font-family: -apple-system, sans-serif;
+            transition: color 0.3s ease;
+            padding: 8px 4px;
+            z-index: 10;
+            background: none;
+            border: none;
+        }
+
+        .dark-block .nav-btn { color: rgba(240,237,230,0.4); }
+        .nav-btn:hover { color: var(--text-primary); }
+        .dark-block .nav-btn:hover { color: var(--text-on-dark); }
+
+        .nav-btn.next { right: 28px; }
+        .nav-btn.prev { left: 28px; }
+
+        .nav-arrow {
+            display: inline-block;
+            width: 28px;
+            height: 1px;
+            background: currentColor;
+            position: relative;
+            transition: width 0.3s ease;
+        }
+
+        .nav-btn.next:hover .nav-arrow { width: 40px; }
+        .nav-btn.prev:hover .nav-arrow { width: 40px; }
+
+        .nav-arrow::after {
+            content: '';
+            position: absolute;
+            width: 6px; height: 6px;
+            border-top: 1px solid currentColor;
+            border-right: 1px solid currentColor;
+            top: -2.5px;
+        }
+
+        .nav-btn.next .nav-arrow::after { right: 0; transform: rotate(45deg); }
+        .nav-btn.prev .nav-arrow::after { left: 0; transform: rotate(-135deg); }
+
+        .indicator {
+            position: fixed;
+            bottom: 26px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 14px;
+            z-index: 10;
+            align-items: center;
+        }
+
+        .ind-dot {
+            width: 20px;
+            height: 2px;
+            background: var(--ink-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            padding: 0;
+        }
+
+        .ind-dot.active {
+            background: var(--ink);
+            width: 36px;
+        }
+
+        .camellia-svg { stroke: currentColor; stroke-width: 1.1; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        .dark-block .camellia-svg { opacity: 0.9; }
+        .light-block .camellia-svg { color: var(--ink); }
+        .dark-block .camellia-svg { color: var(--text-on-dark); }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page.active .label,
+        .page.active .main-title,
+        .page.active .camellia-divider,
+        .page.active .subtitle,
+        .page.active .avatar-flower,
+        .page.active .name-big,
+        .page.active .name-sub,
+        .page.active .info-tags,
+        .page.active .bio,
+        .page.active .section-header,
+        .page.active .interest-row {
+            animation: fadeUp 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .page.active .main-title { animation-delay: 0.1s; }
+        .page.active .camellia-divider { animation-delay: 0.2s; }
+        .page.active .subtitle { animation-delay: 0.3s; }
+        .page.active .name-big { animation-delay: 0.1s; }
+        .page.active .name-sub { animation-delay: 0.15s; }
+        .page.active .info-tags { animation-delay: 0.22s; }
+        .page.active .bio { animation-delay: 0.32s; }
+        .page.active .section-header { animation-delay: 0.1s; }
+        .page.active .interest-row:nth-of-type(1) { animation-delay: 0.2s; }
+        .page.active .interest-row:nth-of-type(2) { animation-delay: 0.3s; }
+        .page.active .interest-row:nth-of-type(3) { animation-delay: 0.4s; }
+
+        @media (max-width: 480px) {
+            body { padding: 12px 8px; }
+            .card-container { height: 540px; }
+            .page-inner { padding: 32px 24px; }
+            .main-title { font-size: 30px; letter-spacing: 8px; }
+            .name-big { font-size: 26px; letter-spacing: 6px; }
+            .bio { font-size: 13px; letter-spacing: 1px; }
+            .theme-toggle { top: 10px; right: 10px; padding: 8px 12px; font-size: 10px; }
+            .nav-btn { bottom: 22px; font-size: 9px; }
+            .nav-btn.next { right: 16px; }
+            .nav-btn.prev { left: 16px; }
+            .int-name { font-size: 18px; letter-spacing: 3px; }
+            .avatar-flower { width: 68px; height: 68px; margin-bottom: 20px; }
+            .info-tag { font-size: 11px; letter-spacing: 1px; }
+            .label { letter-spacing: 5px; }
+            .camellia-divider .div-line { max-width: 40px; }
+            .petal-scatter { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <svg width="0" height="0" style="position:absolute">
+        <defs>
+            <g id="camellia">
+                <g class="camellia-svg">
+                    <ellipse cx="50" cy="50" rx="16" ry="26" transform="rotate(0 50 50)"/>
+                    <ellipse cx="50" cy="50" rx="16" ry="26" transform="rotate(45 50 50)"/>
+                    <ellipse cx="50" cy="50" rx="16" ry="26" transform="rotate(90 50 50)"/>
+                    <ellipse cx="50" cy="50" rx="16" ry="26" transform="rotate(135 50 50)"/>
+                    <ellipse cx="50" cy="50" rx="16" ry="26" transform="rotate(180 50 50)"/>
+                    <ellipse cx="50" cy="50" rx="16" ry="26" transform="rotate(225 50 50)"/>
+                    <ellipse cx="50" cy="50" rx="16" ry="26" transform="rotate(270 50 50)"/>
+                    <ellipse cx="50" cy="50" rx="16" ry="26" transform="rotate(315 50 50)"/>
+                    <ellipse cx="50" cy="50" rx="11" ry="17" transform="rotate(22.5 50 50)" opacity="0.6"/>
+                    <ellipse cx="50" cy="50" rx="11" ry="17" transform="rotate(67.5 50 50)" opacity="0.6"/>
+                    <ellipse cx="50" cy="50" rx="11" ry="17" transform="rotate(112.5 50 50)" opacity="0.6"/>
+                    <ellipse cx="50" cy="50" rx="11" ry="17" transform="rotate(157.5 50 50)" opacity="0.6"/>
+                    <ellipse cx="50" cy="50" rx="11" ry="17" transform="rotate(202.5 50 50)" opacity="0.6"/>
+                    <ellipse cx="50" cy="50" rx="11" ry="17" transform="rotate(247.5 50 50)" opacity="0.6"/>
+                    <ellipse cx="50" cy="50" rx="11" ry="17" transform="rotate(292.5 50 50)" opacity="0.6"/>
+                    <ellipse cx="50" cy="50" rx="11" ry="17" transform="rotate(337.5 50 50)" opacity="0.6"/>
+                    <circle cx="50" cy="50" r="7" fill="none" stroke-width="1.2"/>
+                    <g stroke-width="1.4">
+                        <line x1="50" y1="45" x2="50" y2="41"/>
+                        <line x1="50" y1="55" x2="50" y2="59"/>
+                        <line x1="45" y1="50" x2="41" y2="50"/>
+                        <line x1="55" y1="50" x2="59" y2="50"/>
+                        <line x1="46.5" y1="46.5" x2="44" y2="44"/>
+                        <line x1="53.5" y1="46.5" x2="56" y2="44"/>
+                        <line x1="46.5" y1="53.5" x2="44" y2="56"/>
+                        <line x1="53.5" y1="53.5" x2="56" y2="56"/>
+                    </g>
+                </g>
+            </g>
+            <g id="camellia-leaf">
+                <g class="camellia-svg">
+                    <path d="M15,68 Q2,48 18,28 Q32,38 26,60 Q21,68 15,68Z" opacity="0.6"/>
+                    <path d="M18,62 L12,44" stroke-width="0.7" opacity="0.5"/>
+                    <g transform="translate(30,8) scale(0.65)"><use href="#camellia"/></g>
+                </g>
+            </g>
+            <g id="camellia-branch">
+                <g class="camellia-svg">
+                    <path d="M10,90 Q30,60 25,30 Q28,25 40,20" stroke-width="0.8" fill="none" opacity="0.5"/>
+                    <path d="M28,55 Q20,45 15,50 Q22,58 28,55Z" opacity="0.4"/>
+                    <path d="M35,35 Q45,28 50,32 Q42,40 35,35Z" opacity="0.4"/>
+                    <g transform="translate(18,10) scale(0.35)"><use href="#camellia"/></g>
+                    <g transform="translate(42,42) scale(0.25)"><use href="#camellia"/></g>
+                </g>
+            </g>
+            <g id="petal-single">
+                <path d="M50,20 Q60,40 50,70 Q40,40 50,20Z" class="camellia-svg" opacity="0.7"/>
+            </g>
+            <g id="camellia-bud">
+                <g class="camellia-svg">
+                    <ellipse cx="50" cy="55" rx="10" ry="18" transform="rotate(0 50 55)"/>
+                    <ellipse cx="50" cy="55" rx="10" ry="18" transform="rotate(60 50 55)"/>
+                    <ellipse cx="50" cy="55" rx="10" ry="18" transform="rotate(120 50 55)"/>
+                    <ellipse cx="50" cy="55" rx="10" ry="18" transform="rotate(180 50 55)"/>
+                    <ellipse cx="50" cy="55" rx="10" ry="18" transform="rotate(240 50 55)"/>
+                    <ellipse cx="50" cy="55" rx="10" ry="18" transform="rotate(300 50 55)"/>
+                    <path d="M50,73 Q48,80 45,85 M50,73 Q52,80 55,85 M50,73 L50,88" stroke-width="0.8" opacity="0.5"/>
+                </g>
+            </g>
+            <clipPath id="tear-top" clipPathUnits="objectBoundingBox">
+                <path d="M0,0.08 L0,1 L1,1 L1,0.08 
+                    C0.97,0.03 0.94,0.1 0.91,0.05 C0.88,0 0.85,0.09 0.82,0.04 
+                    C0.79,0 0.76,0.08 0.73,0.03 C0.7,0 0.67,0.1 0.64,0.06 
+                    C0.61,0.02 0.58,0.09 0.55,0.04 C0.52,0 0.49,0.08 0.46,0.05 
+                    C0.43,0.02 0.4,0.1 0.37,0.06 C0.34,0.02 0.31,0.09 0.28,0.04 
+                    C0.25,0 0.22,0.08 0.19,0.05 C0.16,0.02 0.13,0.1 0.1,0.06 
+                    C0.07,0.02 0.04,0.08 0.02,0.05 L0,0.08 Z"/>
+            </clipPath>
+            <clipPath id="tear-bottom" clipPathUnits="objectBoundingBox">
+                <path d="M0,0 L1,0 L1,0.92 
+                    C0.97,0.97 0.94,0.9 0.91,0.95 C0.88,1 0.85,0.91 0.82,0.96 
+                    C0.79,1 0.76,0.92 0.73,0.97 C0.7,1 0.67,0.9 0.64,0.94 
+                    C0.61,0.98 0.58,0.91 0.55,0.96 C0.52,1 0.49,0.92 0.46,0.95 
+                    C0.43,0.98 0.4,0.9 0.37,0.94 C0.34,0.98 0.31,0.91 0.28,0.96 
+                    C0.25,1 0.22,0.92 0.19,0.95 C0.16,0.98 0.13,0.9 0.1,0.94 
+                    C0.07,0.98 0.04,0.92 0.02,0.95 L0,0.92 L0,0 Z"/>
+            </clipPath>
+        </defs>
+    </svg>
+
+    <div class="bg-decorations">
+        <div class="bg-scatter" style="top:5%;left:8%;">
+            <svg width="90" height="90" viewBox="0 0 100 100" style="opacity:0.08"><use href="#camellia-branch" class="camellia-svg"/></svg>
+        </div>
+        <div class="bg-scatter" style="top:15%;right:6%;">
+            <svg width="50" height="50" viewBox="0 0 100 100" style="opacity:0.06"><use href="#camellia" class="camellia-svg"/></svg>
+        </div>
+        <div class="bg-scatter" style="bottom:15%;left:5%;">
+            <svg width="60" height="60" viewBox="0 0 100 100" style="opacity:0.07"><use href="#camellia-bud" class="camellia-svg"/></svg>
+        </div>
+        <div class="bg-scatter" style="bottom:8%;right:8%;">
+            <svg width="70" height="70" viewBox="0 0 100 100" style="opacity:0.06"><use href="#camellia-leaf" class="camellia-svg"/></svg>
+        </div>
+        <div class="bg-scatter" style="top:45%;left:3%;">
+            <svg width="20" height="20" viewBox="0 0 100 100" style="opacity:0.08"><use href="#petal-single" class="camellia-svg" transform="rotate(-30 50 50)"/></svg>
+        </div>
+        <div class="bg-scatter" style="top:30%;right:4%;">
+            <svg width="18" height="18" viewBox="0 0 100 100" style="opacity:0.07"><use href="#petal-single" class="camellia-svg" transform="rotate(40 50 50)"/></svg>
+        </div>
+        <div class="bg-scatter" style="top:70%;right:6%;">
+            <svg width="16" height="16" viewBox="0 0 100 100" style="opacity:0.06"><use href="#petal-single" class="camellia-svg" transform="rotate(160 50 50)"/></svg>
+        </div>
+        <div class="bg-scatter" style="top:8%;left:6%;">
+            <svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="40" r="38" fill="none" stroke="var(--ink-light)" stroke-width="0.5" opacity="0.3"/>
+                <circle cx="40" cy="40" r="24" fill="none" stroke="var(--ink-light)" stroke-width="0.3" stroke-dasharray="2,3" opacity="0.2"/></svg>
+        </div>
+        <div class="bg-scatter" style="top:55%;left:4%;width:10px;height:10px;">
+            <svg width="10" height="10" viewBox="0 0 10 10"><line x1="0" y1="5" x2="10" y2="5" stroke="var(--ink)" stroke-width="0.5"/><line x1="5" y1="0" x2="5" y2="10" stroke="var(--ink)" stroke-width="0.5"/></svg>
+        </div>
+    </div>
+
+    <button class="theme-toggle" id="themeToggle">NIGHT</button>
+
+    <div class="card-container">
+        <div class="card-stack">
+            <div class="page active light-block" data-page="0">
+                <div class="page-inner">
+                    <div class="camellia-watermark tr">
+                        <svg viewBox="0 0 100 100"><use href="#camellia" class="camellia-svg"/></svg>
+                    </div>
+                    <div class="camellia-watermark bl" style="bottom:-5px;left:10px;width:90px;height:90px;opacity:0.03;">
+                        <svg viewBox="0 0 100 100"><use href="#camellia-bud" class="camellia-svg"/></svg>
+                    </div>
+                    <div class="petal-scatter" style="top:25%;right:40px;">
+                        <svg width="16" height="16" viewBox="0 0 100 100"><use href="#petal-single" class="camellia-svg" transform="rotate(25 50 50)"/></svg>
+                    </div>
+                    <div class="petal-scatter" style="bottom:30%;left:30px;">
+                        <svg width="14" height="14" viewBox="0 0 100 100"><use href="#petal-single" class="camellia-svg" transform="rotate(-45 50 50)"/></svg>
+                    </div>
+                    <div class="label">Bonjour</div>
+                    <h1 class="main-title">你好<br>我叫<br>黄时雨</h1>
+                    <div class="camellia-divider">
+                        <span class="div-line"></span>
+                        <svg viewBox="0 0 100 100"><use href="#camellia" class="camellia-svg"/></svg>
+                        <span class="div-line"></span>
+                    </div>
+                    <p class="subtitle">enchanté de vous rencontrer</p>
+                </div>
+                <div class="corner-accent tl">01</div>
+                <button class="nav-btn next" onclick="nextPage()">NEXT <span class="nav-arrow"></span></button>
+            </div>
+
+            <div class="page" data-page="1">
+                <div class="dark-block" style="height:38%; clip-path: url(#tear-bottom); position:relative; z-index:3;">
+                    <div class="page-inner" style="padding-bottom:30px; padding-top:50px;">
+                        <div class="camellia-watermark bl">
+                            <svg viewBox="0 0 100 100"><use href="#camellia" class="camellia-svg"/></svg>
+                        </div>
+                        <div class="camellia-watermark tr" style="top:10px;right:-10px;width:80px;height:80px;opacity:0.06;">
+                            <svg viewBox="0 0 100 100"><use href="#camellia-leaf" class="camellia-svg"/></svg>
+                        </div>
+                        <div class="petal-scatter" style="top:15%;left:15%;">
+                            <svg width="14" height="14" viewBox="0 0 100 100"><use href="#petal-single" class="camellia-svg" transform="rotate(30 50 50)"/></svg>
+                        </div>
+                        <div class="avatar-flower">
+                            <svg viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(240,237,230,0.2)" stroke-width="0.5" stroke-dasharray="2,3"/>
+                                <g transform="scale(0.82) translate(11,11)"><use href="#camellia"/></g>
+                            </svg>
+                        </div>
+                        <div class="name-big">章 鱼</div>
+                        <div class="name-sub">ZHANG YU · OCTOPUS</div>
+                        <div class="info-tags">
+                            <span class="info-tag">中国人民大学</span>
+                            <span class="info-dot"></span>
+                            <span class="info-tag">RUC</span>
+                        </div>
+                        <div class="info-tags" style="margin-top:6px;">
+                            <span class="info-tag">ENFJ</span>
+                            <span class="info-dot"></span>
+                            <span class="info-tag">主人公</span>
+                        </div>
+                    </div>
+                    <div class="corner-accent tl" style="color:rgba(240,237,230,0.4);">02</div>
+                    <button class="nav-btn prev" onclick="prevPage()"><span class="nav-arrow"></span> BACK</button>
+                </div>
+                <div class="light-block" style="flex:1; position:relative;">
+                    <div class="page-inner" style="justify-content:flex-start; padding-top:50px;">
+                        <div class="camellia-watermark br" style="opacity:0.04;">
+                            <svg viewBox="0 0 100 100"><use href="#camellia-bud" class="camellia-svg"/></svg>
+                        </div>
+                        <div class="petal-scatter" style="top:10%;right:20%;">
+                            <svg width="12" height="12" viewBox="0 0 100 100"><use href="#petal-single" class="camellia-svg" transform="rotate(-20 50 50)"/></svg>
+                        </div>
+                        <div class="camellia-divider">
+                            <span class="div-line"></span>
+                            <svg viewBox="0 0 100 100"><use href="#camellia" class="camellia-svg"/></svg>
+                            <span class="div-line"></span>
+                        </div>
+                        <p class="bio">正在度过和手机分手<br>冷静期的大学牲一枚</p>
+                    </div>
+                    <button class="nav-btn next" onclick="nextPage()">NEXT <span class="nav-arrow"></span></button>
+                </div>
+            </div>
+
+            <div class="page" data-page="2">
+                <div class="light-block" style="height:30%; position:relative; z-index:3;">
+                    <div style="position:absolute; bottom:0; left:0; right:0; height:20px; z-index:5;">
+                        <svg viewBox="0 0 100 20" preserveAspectRatio="none" style="width:100%;height:100%;display:block;">
+                            <path d="M0,0 L0,20 L100,20 L100,0 
+                                C97,6 94,2 91,5 C88,0 85,7 82,3 
+                                C79,0 76,6 73,2 C70,6 67,1 64,4 
+                                C61,0 58,7 55,3 C52,0 49,6 46,4 
+                                C43,0 40,7 37,3 C34,0 31,6 28,3 
+                                C25,7 22,1 19,4 C16,0 13,7 10,3 
+                                C7,7 4,1 2,4 L0,0 Z" fill="var(--dark-block)"/>
+                        </svg>
+                    </div>
+                    <div class="page-inner" style="padding-bottom:30px;">
+                        <div class="camellia-watermark tr" style="width:120px;height:120px;opacity:0.05;">
+                            <svg viewBox="0 0 100 100"><use href="#camellia-leaf" class="camellia-svg"/></svg>
+                        </div>
+                        <div class="camellia-watermark tl" style="top:10px;left:-5px;width:70px;height:70px;opacity:0.04;">
+                            <svg viewBox="0 0 100 100"><use href="#camellia-bud" class="camellia-svg"/></svg>
+                        </div>
+                        <div class="petal-scatter" style="top:20%;right:25%;">
+                            <svg width="13" height="13" viewBox="0 0 100 100"><use href="#petal-single" class="camellia-svg" transform="rotate(50 50 50)"/></svg>
+                        </div>
+                        <div class="section-header" style="margin-bottom:0;">
+                            <span class="sec-line"></span>
+                            <svg width="14" height="14" viewBox="0 0 100 100" style="opacity:0.4"><use href="#camellia" class="camellia-svg" transform="scale(0.14)"/></svg>
+                            <span class="sec-label">INTÉRÊTS</span>
+                            <svg width="14" height="14" viewBox="0 0 100 100" style="opacity:0.4"><use href="#camellia" class="camellia-svg" transform="scale(0.14)"/></svg>
+                            <span class="sec-line"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="dark-block" style="flex:1; position:relative; padding-top:16px;">
+                    <div class="page-inner" style="justify-content:flex-start; padding-top:40px;">
+                        <div class="camellia-watermark bl" style="bottom:-10px;left:-15px;width:130px;height:130px;opacity:0.05;">
+                            <svg viewBox="0 0 100 100"><use href="#camellia-branch" class="camellia-svg"/></svg>
+                        </div>
+                        <div class="camellia-watermark br" style="top:10px;right:-5px;width:80px;height:80px;opacity:0.06;">
+                            <svg viewBox="0 0 100 100"><use href="#camellia" class="camellia-svg"/></svg>
+                        </div>
+                        <div class="petal-scatter" style="top:8%;left:12%;">
+                            <svg width="12" height="12" viewBox="0 0 100 100"><use href="#petal-single" class="camellia-svg" transform="rotate(-35 50 50)"/></svg>
+                        </div>
+                        <div class="petal-scatter" style="bottom:15%;right:10%;">
+                            <svg width="14" height="14" viewBox="0 0 100 100"><use href="#petal-single" class="camellia-svg" transform="rotate(120 50 50)"/></svg>
+                        </div>
+                        <div class="interest-list">
+                            <div class="interest-row">
+                                <span class="int-num">Ⅰ</span>
+                                <span class="int-name">看书</span>
+                                <span class="int-icon">📖</span>
+                            </div>
+                            <div class="interest-row">
+                                <span class="int-num">Ⅱ</span>
+                                <span class="int-name">滑冰</span>
+                                <span class="int-icon">⛸</span>
+                            </div>
+                            <div class="interest-row">
+                                <span class="int-num">Ⅲ</span>
+                                <span class="int-name">睡觉</span>
+                                <span class="int-icon">💤</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="corner-accent br" style="color:rgba(240,237,230,0.4);">03</div>
+                    <button class="nav-btn prev" onclick="prevPage()"><span class="nav-arrow"></span> BACK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="indicator" id="indicator">
+        <button class="ind-dot active" data-idx="0" onclick="goToPage(0)"></button>
+        <button class="ind-dot" data-idx="1" onclick="goToPage(1)"></button>
+        <button class="ind-dot" data-idx="2" onclick="goToPage(2)"></button>
+    </div>
+
+    <script>
+        (function() {
+            const pages = document.querySelectorAll('.page');
+            const dots = document.querySelectorAll('.ind-dot');
+            const body = document.body;
+            const toggle = document.getElementById('themeToggle');
+            let currentPage = 0;
+            let isAnimating = false;
+            let isDark = false;
+
+            function updateIndicators() {
+                dots.forEach((d, i) => d.classList.toggle('active', i === currentPage));
+            }
+
+            function resetAnims(el) {
+                const items = el.querySelectorAll('.label,.main-title,.camellia-divider,.subtitle,.avatar-flower,.name-big,.name-sub,.info-tags,.bio,.section-header,.interest-row');
+                items.forEach(i => { i.style.animation = 'none'; i.offsetHeight; i.style.animation = ''; });
+            }
+
+            function goToPage(t) {
+                if (isAnimating || t === currentPage || t < 0 || t >= pages.length) return;
+                isAnimating = true;
+                pages[currentPage].classList.remove('active');
+                pages[t].classList.add('active');
+                resetAnims(pages[t]);
+                currentPage = t;
+                updateIndicators();
+                setTimeout(() => { isAnimating = false; }, 550);
+            }
+
+            window.nextPage = () => goToPage(currentPage + 1);
+            window.prevPage = () => goToPage(currentPage - 1);
+            window.goToPage = goToPage;
+
+            function setTheme(dark) {
+                isDark = dark;
+                body.classList.toggle('dark', dark);
+                toggle.textContent = dark ? 'DAY' : 'NIGHT';
+            }
+
+            toggle.addEventListener('click', () => setTheme(!isDark));
+
+            document.addEventListener('keydown', e => {
+                if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextPage(); }
+                else if (e.key === 'ArrowLeft') { e.preventDefault(); prevPage(); }
+            });
+
+            let sx = 0;
+            document.addEventListener('touchstart', e => { sx = e.changedTouches[0].screenX; }, false);
+            document.addEventListener('touchend', e => {
+                const dx = sx - e.changedTouches[0].screenX;
+                if (Math.abs(dx) > 50) dx > 0 ? nextPage() : prevPage();
+            }, false);
+
+            updateIndicators();
+            setTheme(false);
+        })();
+    </script>
+</body>
+</html>
